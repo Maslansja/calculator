@@ -34,65 +34,66 @@ class Calculator extends StatefulWidget {
 
 class _CalculatorState extends State<Calculator> {
   String output = '0';
+  String _expression = '';
 
   void buttonPressed(String buttonText) {
-  setState(() {
-    if (buttonText == 'C') {
-      output = '0'; // Reset output jika tombol 'C' ditekan
-    } else if (buttonText == '=') {
-      try {
-        output = evaluateExpression(output); // Evaluasi ekspresi
-      } catch (e) {
-        output = 'error'; // Tampilkan 'error' jika terjadi kesalahan
-      }
-    } else {
-      // Jika output saat ini adalah '0', ganti dengan buttonText
-      if (output == '0') {
-        output = buttonText;
+    setState(() {
+      if (buttonText == 'C') {
+        output = '0';
+        _expression = '';
+      } else if (buttonText == '=') {
+        try {
+          output = evaluateExpression(_expression);
+          _expression = output; // Memperbarui ekspresi dengan hasilnya
+        } catch (e) {
+          output = 'Error';
+        }
       } else {
-        // Tambahkan buttonText ke output yang ada
-        output += buttonText;
+        if (output == '0' && buttonText != '.') {
+          output = buttonText;
+        } else {
+          output += buttonText;
+        }
+        _expression += buttonText;
       }
-    }
-  });
-}
+    });
+  }
 
-  String evaluateExpression (String expression) {
-    final parsedExpression = Expression.parse(expression);
+  String evaluateExpression(String expression) {
+    final parsedExpression = Expression.parse(expression.replaceAll('x', '*'));
     final evaluator = ExpressionEvaluator();
     final result = evaluator.eval(parsedExpression, {});
     return result.toString();
   }
 
-  Widget buildButton (String buttonText, Color color, {double widthFactor = 1.0}) {
+  Widget buildButton(String buttonText, Color color,
+      {double widthFactor = 1.0}) {
     return Expanded(
       flex: widthFactor.toInt(),
       child: Padding(
         padding: EdgeInsets.all(8.0),
         child: ElevatedButton(
-          onPressed: ()=>buttonPressed(buttonText),
-          child: Text (buttonText,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w400,
-            color: Colors.white
-          ),
+          onPressed: () => buttonPressed(buttonText),
+          child: Text(
+            buttonText,
+            style: TextStyle(
+                fontSize: 28, fontWeight: FontWeight.w400, color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 22),
             backgroundColor: color,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40)
+              borderRadius: BorderRadius.circular(40),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
   }
-  
+
   @override
-  Widget build (BuildContext) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,9 +102,10 @@ class _CalculatorState extends State<Calculator> {
             child: Container(
               padding: EdgeInsets.only(bottom: 24, right: 24),
               alignment: Alignment.bottomRight,
-              child: Text(output,
+              child: Text(
+                output,
                 style: TextStyle(
-                  fontSize: 89,
+                  fontSize: 64,
                   color: Colors.white,
                 ),
               ),
@@ -113,9 +115,9 @@ class _CalculatorState extends State<Calculator> {
             children: [
               Row(
                 children: [
-                  buildButton('C', Colors.grey.shade500),
-                  buildButton('+/-', Colors.grey.shade500),
-                  buildButton('%', Colors.grey.shade500),
+                  buildButton('C', Colors.grey.shade600),
+                  buildButton('+/-', Colors.grey.shade600),
+                  buildButton('%', Colors.grey.shade600),
                   buildButton('/', Colors.orange.shade600),
                 ],
               ),
@@ -145,7 +147,7 @@ class _CalculatorState extends State<Calculator> {
               ),
               Row(
                 children: [
-                  buildButton('0', Colors.grey.shade800, widthFactor: 2.0),
+                  buildButton('0', Colors.grey.shade800, widthFactor: 2),
                   buildButton('.', Colors.grey.shade800),
                   buildButton('=', Colors.orange),
                 ],
@@ -156,26 +158,4 @@ class _CalculatorState extends State<Calculator> {
       ),
     );
   }
-}
-
-
-Widget buildButton(String label, {Color color = Colors.grey}) {
-  return Expanded(
-    child: Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: ElevatedButton(
-        onPressed: () {
-          // Logika untuk aksi tombol
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          padding: EdgeInsets.all(24),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(fontSize: 28, color: Colors.white),
-        ),
-      ),
-    ),
-  );
 }
